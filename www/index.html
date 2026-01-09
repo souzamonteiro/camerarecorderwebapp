@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a2a6c">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <title>Camera & Microphone Recorder</title>
+    <link rel="icon" href="icons/favicon.ico" type="image/x-icon">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+
+    <!-- CSS Libraries -->
+    <link rel="stylesheet" href="css/fontawesome.min.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 500px;
+            overflow: hidden;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .settings-container {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .setting-row {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #444;
+        }
+
+        select, button {
+            width: 100%;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            background-color: white;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        select {
+            margin-bottom: 10px;
+        }
+
+        button {
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+        }
+
+        #record {
+            background-color: #2a9d8f;
+        }
+
+        #pause {
+            background-color: #264653;
+        }
+
+        #stop {
+            background-color: #e63946;
+        }
+
+        #save {
+            background-color: #f4a261;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        button:active {
+            transform: translateY(-1px);
+        }
+
+        #status {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        .recording {
+            background-color: #ff7b7b;
+        }
+
+        .paused {
+            background-color: #ffeaa7;
+        }
+
+        .saved {
+            background-color: #a2ff98;
+        }
+
+        .preview {
+            margin-top: 20px;
+            width: 100%;
+            height: 200px;
+            background-color: #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            display: none;
+        }
+
+        .preview video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+            display: none;
+        }
+
+        .file-info button {
+            margin-top: 10px;
+            padding: 8px 15px;
+            background-color: #457b9d;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .camera-permission {
+            text-align: center;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ffeaa7;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .camera-permission p {
+            margin-bottom: 10px;
+        }
+
+        .camera-permission button {
+            background-color: #f4a261;
+        }
+
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-container input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-container label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Camera & Microphone Recorder</h1>
+        
+        <div class="settings-container">
+            <div class="setting-row">
+                <label for="camera-select">Select Camera:</label>
+                <select id="camera-select">
+                    <option value="">-- Select Camera --</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <label for="audio-select">Select Audio Source:</label>
+                <select id="audio-select">
+                    <option value="mic">Microphone</option>
+                    <option value="system">System Audio</option>
+                </select>
+            </div>
+            <div class="setting-row">
+                <div class="checkbox-container">
+                    <input type="checkbox" id="rnnoise-toggle">
+                    <label for="rnnoise-toggle">Enable Noise Filtering (RNNoise)</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="button-container">
+            <button id="record">Record</button>
+            <button id="pause" disabled>Pause</button>
+            <button id="stop" disabled>Stop</button>
+        </div>
+        <div id="status">Click Record to start</div>
+        
+        <div class="preview">
+            <video id="preview"></video>
+        </div>
+        
+        <div class="camera-permission" id="camera-permission">
+            <p>Camera permission required to start recording</p>
+            <button id="allow-camera">Allow Camera Access</button>
+        </div>
+        
+        <div class="file-info" id="file-info">
+            <p>Recording saved as <span id="file-name"></span></p>
+        <button id="download">Download</button>
+        </div>
+
+        <div style="margin-top: 40px; padding: 20px; text-align: center; color: var(--dark-gray); font-size: 14px; border-top: 1px solid #e0e0e0;">
+            <p style="margin-bottom: 10px;">
+                &copy; 2026 Roberto Luiz Souza Monteiro. All rights reserved.
+            </p>
+            <p style="margin-bottom: 10px;">
+                <a href="https://github.com/souzamonteiro/camerarecorder.git" 
+                    target="_blank"
+                    style="color: var(--primary-color); text-decoration: none; display: inline-flex; align-items: center; gap: 6px;"
+                    onmouseover="this.style.textDecoration='underline'"
+                    onmouseout="this.style.textDecoration='none'">
+                    <i class="fa-brands fa-github"></i>
+                    View source code on GitHub
+                </a>
+            </p>
+            <p style="font-size: 12px; opacity: 0.8;">
+                This project is licensed under the Apache 2.0 License.
+            </p>
+        </div>
+    </div>
+
+    <!-- <script src="libs/rnnoise.js"></script> -->
+    <script type="module">
+        // Import the RNNoise module
+        import RNNoiseModule from './libs/rnnoise.js';
+        
+        // Make it globally available
+        window.RNNoiseModule = RNNoiseModule;
+    </script>
+
+    <script>
+        // DOM elements
+        const recordButton = document.getElementById('record');
+        const pauseButton = document.getElementById('pause');
+        const stopButton = document.getElementById('stop');
+        const saveButton = document.getElementById('save');
+        const statusDiv = document.getElementById('status');
+        const previewVideo = document.getElementById('preview');
+        const fileInfoDiv = document.getElementById('file-info');
+        const fileNameSpan = document.getElementById('file-name');
+        const downloadButton = document.getElementById('download');
+        const previewContainer = document.querySelector('.preview');
+        const cameraSelect = document.getElementById('camera-select');
+        const audioSelect = document.getElementById('audio-select');
+        const cameraPermission = document.getElementById('camera-permission');
+        const allowCameraButton = document.getElementById('allow-camera');
+        const rnnoiseToggle = document.getElementById('rnnoise-toggle');
+
+        // Global variables
+        let recordedChunks = [];
+        let mediaRecorder = null;
+        let stream = null;
+        let cameraStream = null;
+        let audioStream = null;
+        let audioCtx = null;
+        let audioDestination = null;
+        let recordingStartTime = 0;
+        let recordingDuration = 0;
+        let availableCameras = [];
+        let rnnoiseProcessor = null;
+        let scriptNode = null;
+
+        // Setup RNNoise processor for noise reduction
+        async function setupRNNoiseProcessor(sourceNode, destinationNode) {
+            try {
+                // Wait for RNNoise module to be available
+                if (typeof window.RNNoiseModule === 'undefined') {
+                    console.warn('RNNoise module not loaded yet');
+                    // Wait a bit and try again
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                    if (typeof window.RNNoiseModule === 'undefined') {
+                        console.warn('RNNoise module still not available');
+                        return false;
+                    }
+                }
+
+                // Get the module
+                const RNNoiseModule = window.RNNoiseModule;
+                
+                // Wait for the module to be ready
+                if (typeof RNNoiseModule.ready !== 'undefined') {
+                    await RNNoiseModule.ready;
+                }
+
+                // Initialize RNNoise state
+                let denoiserState = null;
+                
+                try {
+                    // Call rnnoise_init
+                    if (RNNoiseModule._rnnoise_init) {
+                        RNNoiseModule._rnnoise_init();
+                    }
+                    // Create denoiser state
+                    if (RNNoiseModule._rnnoise_create) {
+                        denoiserState = RNNoiseModule._rnnoise_create();
+                    } else {
+                        console.warn('RNNoise create function not found');
+                        return false;
+                    }
+                } catch (err) {
+                    console.warn('Error initializing RNNoise:', err);
+                    return false;
+                }
+
+                // Create a ScriptProcessorNode for real-time audio processing
+                const bufferSize = 512;
+                scriptNode = audioCtx.createScriptProcessor(bufferSize, 1, 1);
+
+                // Store references for cleanup
+                rnnoiseProcessor = { state: denoiserState, module: RNNoiseModule };
+
+                // Process audio frames
+                scriptNode.onaudioprocess = (event) => {
+                    const input = event.inputBuffer.getChannelData(0);
+                    const output = event.outputBuffer.getChannelData(0);
+                    
+                    try {
+                        if (RNNoiseModule._rnnoise_process_frame && denoiserState) {
+                            // Call RNNoise process frame
+                            RNNoiseModule._rnnoise_process_frame(denoiserState, input);
+                        }
+                        
+                        // Copy audio to output
+                        for (let i = 0; i < input.length; i++) {
+                            output[i] = input[i];
+                        }
+                    } catch (err) {
+                        console.warn('Error during denoising:', err);
+                        // Fallback: copy input to output
+                        for (let i = 0; i < input.length; i++) {
+                            output[i] = input[i];
+                        }
+                    }
+                };
+
+                // Connect the source -> script processor -> destination
+                sourceNode.connect(scriptNode);
+                scriptNode.connect(destinationNode);
+                
+                return true;
+            } catch (error) {
+                console.error('Failed to setup RNNoise:', error);
+                return false;
+            }
+        }
+
+        // Get available cameras
+        async function getAvailableCameras() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const cameras = devices.filter(device => device.kind === 'videoinput');
+                
+                cameraSelect.innerHTML = '<option value="">-- Select Camera --</option>';
+                
+                cameras.forEach(camera => {
+                    const option = document.createElement('option');
+                    option.value = camera.deviceId;
+                    option.text = camera.label || `Camera ${availableCameras.length + 1}`;
+                    cameraSelect.appendChild(option);
+                });
+                
+                availableCameras = cameras;
+            } catch (error) {
+                console.error('Error getting camera list:', error);
+                statusDiv.textContent = 'Error accessing devices. Please try again.';
+            }
+        }
+
+        // Get camera stream
+        async function getCameraStream() {
+            try {
+                const constraints = {
+                    video: true,
+                    audio: false
+                };
+                
+                // Use the selected camera if available
+                if (cameraSelect.value) {
+                    constraints.video = { deviceId: { exact: cameraSelect.value } };
+                }
+                
+                const cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+                return cameraStream;
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+                statusDiv.textContent = 'Error accessing camera. Please try again.';
+                return null;
+            }
+        }
+
+        // Get audio stream
+        async function getAudioStream() {
+            try {
+                // Determine if we should get microphone or system audio
+                if (audioSelect.value === 'system') {
+                    // System audio is not widely supported
+                    // This is just a placeholder - system audio capture is complex and not fully supported
+                    // For this demo, we'll just return a dummy stream
+                    console.log('System audio requested (not fully supported)');
+                    return null;
+                } else {
+                    // Get microphone
+                    const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    return audioStream;
+                }
+            } catch (error) {
+                console.error('Error accessing audio:', error);
+                statusDiv.textContent = 'Error accessing audio. Please try again.';
+                return null;
+            }
+        }
+
+        // Get combined stream
+        async function getCombinedStream() {
+            try {
+                // Get camera stream first
+                const camera = await getCameraStream();
+                if (!camera) return null;
+
+                // Get audio stream
+                const audio = await getAudioStream();
+                if (!audio) return null;
+
+                // Keep references for cleanup
+                cameraStream = camera;
+                audioStream = audio;
+
+                // Mix audio via Web Audio API to avoid artifacts when combining multiple audio tracks
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    audioDestination = audioCtx.createMediaStreamDestination();
+
+                    // If audio (microphone) available, connect it
+                    if (audio && audio.getAudioTracks().length > 0) {
+                        try {
+                            const micSrc = audioCtx.createMediaStreamSource(new MediaStream(audio.getAudioTracks()));
+                            
+                            // Apply RNNoise filter if enabled
+                            if (rnnoiseToggle.checked) {
+                                try {
+                                    const success = await setupRNNoiseProcessor(micSrc, audioDestination);
+                                    if (!success) {
+                                        console.warn('RNNoise setup failed, using unfiltered audio');
+                                        micSrc.connect(audioDestination);
+                                    }
+                                } catch (err) {
+                                    console.warn('RNNoise setup error, using unfiltered audio:', err);
+                                    micSrc.connect(audioDestination);
+                                }
+                            } else {
+                                micSrc.connect(audioDestination);
+                            }
+                        } catch (err) {
+                            console.warn('Error connecting mic to AudioContext:', err);
+                        }
+                    }
+                } catch (err) {
+                    console.warn('AudioContext not available:', err);
+                    audioCtx = null;
+                    audioDestination = null;
+                }
+
+                // Combine camera video tracks + mixed audio track (if available)
+                const mixedAudioTracks = (audioDestination && audioDestination.stream) ? audioDestination.stream.getAudioTracks() : [];
+                const combinedStream = new MediaStream([
+                    ...camera.getTracks(),
+                    ...mixedAudioTracks
+                ]);
+
+                return combinedStream;
+            } catch (error) {
+                console.error('Error getting combined stream:', error);
+                return null;
+            }
+        }
+
+        // Start recording
+        async function startRecording() {
+            try {
+                // Reset UI
+                statusDiv.textContent = 'Recording...';
+                statusDiv.classList.remove('recording', 'paused');
+                pauseButton.disabled = false;
+                stopButton.disabled = false;
+                recordButton.disabled = true;
+                previewVideo.style.display = 'block';
+                fileInfoDiv.style.display = 'none';
+                
+                // Get the combined stream
+                const combinedStream = await getCombinedStream();
+                if (!combinedStream) {
+                    statusDiv.textContent = 'Error starting recording. Please try again.';
+                    return;
+                }
+
+                // Set up media recorder
+                mediaRecorder = new MediaRecorder(combinedStream, { 
+                    mimeType: 'video/webm;codecs=vp9',
+                    audioBitsPerSecond: 128000
+                });
+                
+                // Event handlers
+                mediaRecorder.ondataavailable = handleDataAvailable;
+                mediaRecorder.onstop = handleStop;
+
+                // Start the media recorder
+                recordedChunks = [];
+                mediaRecorder.start();
+                
+                // Start recording time
+                recordingStartTime = Date.now();
+                
+                // Keep global reference so stop handler can clean tracks
+                stream = combinedStream;
+
+                // Start preview (live)
+                previewContainer.style.display = 'block';
+                previewVideo.srcObject = combinedStream;
+                previewVideo.controls = false;
+                previewVideo.muted = true;
+                await previewVideo.play();
+
+                // Update status
+                statusDiv.textContent = 'Recording...';
+                statusDiv.classList.add('recording');
+                
+            } catch (error) {
+                console.error('Error starting recording:', error);
+                statusDiv.textContent = 'Error starting recording. Please try again.';
+            }
+        }
+
+        // Handle data available from media recorder
+        function handleDataAvailable(event) {
+            if (event.data.size > 0) {
+                recordedChunks.push(event.data);
+            }
+        }
+
+        // Stop recording
+        function handleStop() {
+            // Stop all tracks in the recorded stream
+            if (stream) stream.getTracks().forEach(track => track.stop());
+            // Stop audio stream if we have one
+            if (audioStream) audioStream.getTracks().forEach(track => track.stop());
+            // Stop camera stream if separate
+            if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+            // Clean up RNNoise processor
+            if (rnnoiseProcessor) {
+                try { 
+                    if (rnnoiseProcessor.module && rnnoiseProcessor.module._rnnoise_destroy && rnnoiseProcessor.state) {
+                        rnnoiseProcessor.module._rnnoise_destroy(rnnoiseProcessor.state);
+                    }
+                } catch(e){}
+                rnnoiseProcessor = null;
+            }
+            // Clean up script node
+            if (scriptNode) {
+                try {
+                    scriptNode.disconnect();
+                } catch(e){}
+                scriptNode = null;
+            }
+            // Close AudioContext if created
+            if (audioCtx) {
+                try { audioCtx.close(); } catch(e){}
+                audioCtx = null;
+                audioDestination = null;
+            }
+            
+            // Create a blob from recorded chunks
+            const blob = new Blob(recordedChunks, { type: 'video/webm' });
+            
+            // Create a file and URL for playback/download
+            const file = new File([blob], `camera-recording-${new Date().toISOString().slice(0, 19)}.webm`);
+            const url = URL.createObjectURL(blob);
+
+            // Display file info and show preview playback
+            fileNameSpan.textContent = file.name;
+            fileInfoDiv.style.display = 'block';
+
+            // Stop live preview and show recorded playback
+            try { previewVideo.pause(); } catch(e){}
+            previewVideo.srcObject = null;
+            previewVideo.src = url;
+            previewVideo.controls = true;
+            previewVideo.muted = false;
+            previewVideo.play();
+            previewContainer.style.display = 'block';
+
+            // Wire download button to this blob URL
+            downloadButton.onclick = () => {
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+            };
+            
+            // Reset UI
+            recordButton.disabled = false;
+            pauseButton.disabled = true;
+            stopButton.disabled = true;
+            statusDiv.textContent = 'Recording saved!';
+            statusDiv.classList.add('saved');
+            // Reset pause button label and classes
+            pauseButton.textContent = 'Pause';
+            statusDiv.classList.remove('recording', 'paused');
+
+            // Reset recorded chunks
+            recordedChunks = [];
+        }
+
+        // Pause recording
+        function pauseRecording() {
+            if (!mediaRecorder) return;
+
+            if (mediaRecorder.state === 'recording') {
+                // Calculate duration paused
+                const pausedDuration = Date.now() - recordingStartTime;
+                recordingDuration += pausedDuration;
+
+                mediaRecorder.pause();
+                statusDiv.textContent = 'Recording paused';
+                statusDiv.classList.remove('recording');
+                statusDiv.classList.add('paused');
+                pauseButton.textContent = 'Resume';
+            } else if (mediaRecorder.state === 'paused') {
+                // Resume recording
+                recordingStartTime = Date.now();
+                mediaRecorder.resume();
+                statusDiv.textContent = 'Recording...';
+                statusDiv.classList.remove('paused');
+                statusDiv.classList.add('recording');
+                pauseButton.textContent = 'Pause';
+            }
+        }
+
+        // Event listeners
+        recordButton.addEventListener('click', startRecording);
+
+        pauseButton.addEventListener('click', pauseRecording);
+
+        stopButton.addEventListener('click', () => {
+            if (mediaRecorder && (mediaRecorder.state === 'recording' || mediaRecorder.state === 'paused')) {
+                // Stop recording and fire the onstop event
+                mediaRecorder.stop();
+            }
+        });
+
+        // Camera permission handler
+        allowCameraButton.addEventListener('click', async () => {
+            try {
+                await getAvailableCameras();
+                cameraPermission.style.display = 'none';
+                startRecording();
+            } catch (error) {
+                console.error('Error accessing devices:', error);
+                statusDiv.textContent = 'Error accessing devices. Please try again.';
+            }
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', () => {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            if (cameraStream) cameraStream.getTracks().forEach(track => track.stop());
+            if (audioStream) audioStream.getTracks().forEach(track => track.stop());
+            if (rnnoiseProcessor) {
+                try { 
+                    if (rnnoiseProcessor.module && rnnoiseProcessor.module._rnnoise_destroy && rnnoiseProcessor.state) {
+                        rnnoiseProcessor.module._rnnoise_destroy(rnnoiseProcessor.state);
+                    }
+                } catch(e){}
+            }
+            if (scriptNode) {
+                try { scriptNode.disconnect(); } catch(e){}
+            }
+            if (audioCtx) {
+                try { audioCtx.close(); } catch(e){}
+            }
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            getAvailableCameras();
+            cameraPermission.style.display = 'block';
+        });
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+            .then(() => console.log('Service Worker successfully registered.'))
+            .catch(err => console.error('Erro SW:', err));
+        }
+    </script>
+</body>
+</html>
