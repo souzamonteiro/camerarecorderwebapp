@@ -14,8 +14,8 @@ const config = {
     //folder: '.',
     //enableSSL: false,
     enableSSL: true,
-    sslKey: 'localhost+2-key.pem',
-    sslCert: 'localhost+2.pem',
+    sslKey: 'localhost-key.pem',
+    sslCert: 'localhost.pem',
     cors: true,
     spaMode: true, // Single Page Application mode (redirect all to index.html)
     gzip: true,

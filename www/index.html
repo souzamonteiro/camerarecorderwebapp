@@ -276,15 +276,21 @@
         </div>
     </div>
 
-    <!-- <script src="libs/rnnoise.js"></script> -->
-    <script type="module">
-        // Import the RNNoise module
-        import RNNoiseModule from './libs/rnnoise.js';
-        
-        // Make it globally available
-        window.RNNoiseModule = RNNoiseModule;
-    </script>
+     <script type="module">
+        // Import the RNNoise module and initialize with correct wasm location
+        import rnnoise from './libs/rnnoise.js';
 
+        try {
+            // Pass locateFile so the loader finds rnnoise.wasm inside ./libs/
+            const RNNoiseModule = await rnnoise({ locateFile: path => './libs/' + path });
+            window.RNNoiseModule = RNNoiseModule;
+            console.log('RNNoise module initialized', !!(RNNoiseModule && RNNoiseModule._rnnoise_create));
+        } catch (err) {
+            console.error('Failed to initialize RNNoise module:', err);
+            // keep window.RNNoiseModule undefined so fallback logic can handle it
+        }
+    </script>
+    
     <script>
         // DOM elements
         const recordButton = document.getElementById('record');
