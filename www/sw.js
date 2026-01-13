@@ -18,7 +18,9 @@ const urlsToCache = [
   './icons/apple-touch-icon.png',
   './icons/favicon-16.png',
   './icons/favicon-32.png',
-  './icons/icon.svg'
+  './icons/icon.svg',
+  './libs/rnnoise.js',
+  '.libs/rnnoise.wasm'
 ];
 
 // Installation - cache all resources
