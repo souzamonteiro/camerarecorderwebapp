@@ -140,7 +140,7 @@
             margin-top: 20px;
             width: 100%;
             height: 200px;
-            background-color: #f0f0f0;
+            background-color: #000; /* letterbox background */
             border-radius: 8px;
             overflow: hidden;
             position: relative;
@@ -150,7 +150,8 @@
         .preview video {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain; /* 🔑 keeps aspect ratio */
+            background-color: #000;
         }
 
         .file-info {
