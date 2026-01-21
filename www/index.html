@@ -330,7 +330,7 @@
         let currentMicSource = null;
         let isFilterEnabled = false;
 
-        // Setup RNNoise processor for noise reduction - FIXED VERSION
+        // Setup RNNoise processor for noise reduction
         async function setupRNNoiseProcessor(sourceNode, destinationNode) {
             console.log('🔧 Setting up RNNoise processor...');
             
@@ -350,7 +350,7 @@
                     await RNNoiseModule.ready;
                 }
 
-                // Create RNNoise state - LIKE IN C CODE
+                // Create RNNoise state
                 let denoiserState = null;
                 try {
                     // First, clean up any existing state
@@ -370,7 +370,7 @@
                         try { RNNoiseModule._free(rnnoiseProcessor.pcmOutputBuf); } catch(e){}
                     }
                     
-                    // Create new state - LIKE C CODE: state->rnnoise_state = rnnoise_create(NULL);
+                    // Create new state
                     if (RNNoiseModule._rnnoise_create) {
                         denoiserState = RNNoiseModule._rnnoise_create();
                         console.log('✅ RNNoise state created');
@@ -387,11 +387,11 @@
                 const bufferSize = 512;
                 scriptNode = audioCtx.createScriptProcessor(bufferSize, 1, 1);
 
-                // Constants - SAME AS C CODE
-                const FRAME_SIZE = 480; // RNNOISE_FRAME_SIZE in C code
+                // Constants
+                const FRAME_SIZE = 480;
                 const heap = RNNoiseModule;
                 
-                // Allocate WASM buffers - SAME SIZE AS C CODE EXPECTS
+                // Allocate WASM buffers
                 const BUFFER_BYTE_SIZE = FRAME_SIZE * 4; // Float32 = 4 bytes
                 const pcmInputBuf = heap._malloc(BUFFER_BYTE_SIZE);
                 const pcmOutputBuf = heap._malloc(BUFFER_BYTE_SIZE);
@@ -412,14 +412,14 @@
                     pcmOutputBuf 
                 };
 
-                // Processing state - SIMILAR TO C CODE
+                // Processing state
                 let accBuf = new Float32Array(FRAME_SIZE);
                 let accLen = 0;
                 let processedQueue = [];
-                let warmupFrames = 2; // Like C code: static bool first_frame = true;
+                let warmupFrames = 2;
                 let framesProcessed = 0;
 
-                // Audio processing callback - FIXED VERSION
+                // Audio processing callback
                 scriptNode.onaudioprocess = (event) => {
                     const input = event.inputBuffer.getChannelData(0);
                     const output = event.outputBuffer.getChannelData(0);
@@ -437,7 +437,7 @@
                             inPos += take;
 
                             if (accLen === FRAME_SIZE) {
-                                // CRITICAL FIX: Convert audio data to match C code
+                                // CRITICAL FIX: Convert audio data
                                 // C code: float_buffer[j] = (float)(l + r / 2);
                                 // This converts int16 stereo to float mono
                                 
@@ -453,15 +453,15 @@
                                 // Copy to WASM memory
                                 heap.HEAPF32.set(toSend, pcmInputIndex);
 
-                                // Process frame - LIKE C CODE: rnnoise_process_frame(state->rnnoise_state, output_buffer, float_buffer);
+                                // Process frame
                                 heap._rnnoise_process_frame(denoiserState, pcmOutputBuf, pcmInputBuf);
 
                                 // Get processed data
                                 const processed = new Float32Array(FRAME_SIZE);
                                 processed.set(heap.HEAPF32.subarray(pcmOutputIndex, pcmOutputIndex + FRAME_SIZE));
 
-                                // Apply clipping and scaling back - LIKE C CODE
-                                const RNNOISE_GAIN = 0.95; // Same as C demo
+                                // Apply clipping and scaling back
+                                const RNNOISE_GAIN = 0.95;
                                 for (let k = 0; k < processed.length; k++) {
                                     let s = processed[k] * RNNOISE_GAIN / 32768.0; // Scale back to [-1, 1]
                                     if (s > 1.0) s = 1.0;
@@ -469,7 +469,7 @@
                                     processed[k] = s;
                                 }
 
-                                // Skip first frames for warm-up - LIKE C CODE
+                                // Skip first frames for warm-up
                                 framesProcessed++;
                                 if (framesProcessed > warmupFrames) {
                                     processedQueue.push(processed);
