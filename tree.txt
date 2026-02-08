@@ -1,0 +1,93 @@
+.
+├── LICENSE
+├── README.md
+├── create_certs.sh
+├── deps
+│   ├── rnnoise-demo-master
+│   │   ├── LICENSE
+│   │   ├── README.md
+│   │   ├── index.html
+│   │   ├── rnnoise-COPYING
+│   │   ├── rnnoise-LICENSE
+│   │   ├── rnnoise.js
+│   │   └── rnnoise.wasm
+│   └── rnnoise-demo-master.zip
+├── generate-certs.sh
+├── generate-icons.sh
+├── icons
+│   ├── apple-touch-icon.png
+│   ├── favicon-16.png
+│   ├── favicon-32.png
+│   ├── favicon.ico
+│   ├── icon-128x128.png
+│   ├── icon-144x144.png
+│   ├── icon-152x152.png
+│   ├── icon-16x16.png
+│   ├── icon-180x180.png
+│   ├── icon-192x192.png
+│   ├── icon-32x32.png
+│   ├── icon-384x384.png
+│   ├── icon-512x512.png
+│   ├── icon-72x72.png
+│   ├── icon-96x96.png
+│   ├── icon.ai
+│   └── icon.svg
+├── localhost-key.pem
+├── localhost.pem
+├── package-lock.json
+├── package.json
+├── prototypes
+│   ├── index-v1.html
+│   ├── index-v2.html
+│   ├── index-v3.html
+│   ├── index-v4.html
+│   └── libs
+│       ├── rnnoise.js
+│       └── rnnoise.wasm
+├── server.js
+├── tree.txt
+└── www
+    ├── css
+    │   └── fontawesome.min.css
+    ├── icons
+    │   ├── apple-touch-icon.png
+    │   ├── favicon-16.png
+    │   ├── favicon-32.png
+    │   ├── favicon.ico
+    │   ├── icon-128x128.png
+    │   ├── icon-144x144.png
+    │   ├── icon-152x152.png
+    │   ├── icon-16x16.png
+    │   ├── icon-180x180.png
+    │   ├── icon-192x192.png
+    │   ├── icon-32x32.png
+    │   ├── icon-384x384.png
+    │   ├── icon-512x512.png
+    │   ├── icon-72x72.png
+    │   ├── icon-96x96.png
+    │   ├── icon.ai
+    │   └── icon.svg
+    ├── index.html
+    ├── libs
+    │   ├── rnnoise.js
+    │   └── rnnoise.wasm
+    ├── manifest.json
+    ├── sw.js
+    └── webfonts
+        ├── fa-brands-400.eot
+        ├── fa-brands-400.svg
+        ├── fa-brands-400.ttf
+        ├── fa-brands-400.woff
+        ├── fa-brands-400.woff2
+        ├── fa-regular-400.eot
+        ├── fa-regular-400.svg
+        ├── fa-regular-400.ttf
+        ├── fa-regular-400.woff
+        ├── fa-regular-400.woff2
+        ├── fa-solid-900.eot
+        ├── fa-solid-900.svg
+        ├── fa-solid-900.ttf
+        ├── fa-solid-900.woff
+        └── fa-solid-900.woff2
+
+11 directories, 80 files
