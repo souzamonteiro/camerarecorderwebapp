@@ -1,6 +1,7 @@
-const CACHE_NAME = 'camerarecorder-v1';
+const CACHE_NAME = 'camerarecorder-reel-v1';
 const urlsToCache = [
   './',
+  './maia-reel.css?v=1',
   './css',
   './css/fontawesome.min.css',
   './icons',
@@ -48,7 +49,8 @@ self.addEventListener('install', event => {
     caches.open(CACHE_NAME)
       .then(cache => {
         console.log('Cache aberto');
-        return cache.addAll(urlsToCache).catch(err => {
+        return cache.addAll(['./', './index.html', './maia-reel.css?v=1', './manifest.json'])
+          .then(() => cache.addAll(urlsToCache)).catch(err => {
           console.warn('Some resources could not be cached:', err);
         });
       })
@@ -63,7 +65,7 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames
-          .filter(cacheName => cacheName !== CACHE_NAME) // Keep only the current cache
+          .filter(cacheName => cacheName.startsWith('camerarecorder-') && cacheName !== CACHE_NAME) // Keep only the current cache
           .map(cacheName => {
             console.log('Removing old cache:', cacheName);
             return caches.delete(cacheName); // Remove old caches
@@ -83,7 +85,7 @@ self.addEventListener('fetch', event => {
   }
 
   event.respondWith(
-    caches.match(event.request)
+    caches.open(CACHE_NAME).then(cache => cache.match(event.request))
       .then(cachedResponse => {
         // If found in the cache, return it
         if (cachedResponse) {
@@ -112,7 +114,7 @@ self.addEventListener('fetch', event => {
           .catch(error => {
             // If the network fails and it's an HTML page, it returns the offline page
             if (event.request.headers.get('accept').includes('text/html')) {
-              return caches.match('./index.html');
+              return caches.open(CACHE_NAME).then(cache => cache.match('./index.html'));
             }
             // For other resources, you can return a fallback
             console.log('Fetch failed; returning offline page instead.', error);

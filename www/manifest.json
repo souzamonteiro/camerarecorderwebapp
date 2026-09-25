@@ -3,8 +3,8 @@
   "short_name": "CameraRecorder",
   "start_url": "./index.html",
   "display": "standalone",
-  "theme_color": "#3498db",
-  "background_color": "#f5f7fa",
+  "theme_color": "#10131c",
+  "background_color": "#10131c",
   "description": "Record and save camera videos directly from your browser",
   "icons": [
     {

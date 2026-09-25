@@ -68,3 +68,14 @@ rsvg-convert -w 512 -h 512 www/icons/icon.svg -o www/icons/icon-512.png
 
 ## License
 This project is licensed under the Apache 2.0 License (see `LICENSE`).
+
+## Maia Reel visual theme
+
+The interface uses the shared Maia Reel dark theme in `www/maia-reel.css`,
+loaded after the app's layout styles. It is a local static asset: no CDN, build
+step or new server is needed. Media processing and user-selected video title
+styles remain under the original application code's control.
+
+The canonical stylesheet and deployment instructions are maintained in the
+sibling `maia-edge-apps-deployment` repository, in `themes/maia-reel.css` and
+`docs/MEDIA-THEME.md`. The PWA cache has a new version and is scoped to this app.
